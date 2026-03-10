@@ -71,24 +71,38 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  // --- Função de Salvar Nota Corrigida e Blindada ---
   const handleSaveNote = (e) => {
     e.preventDefault();
-    const title = e.target.title.value;
-    const content = e.target.content.value;
-    const category = e.target.category.value;
-    const tags = e.target.tags.value.split(',').map(t => t.trim()).filter(t => t);
+    try {
+      const title = e.target.title.value;
+      const content = e.target.content.value;
+      const category = e.target.category.value;
+      const tags = e.target.tags.value.split(',').map(t => t.trim()).filter(t => t);
 
-    if (editingNote) {
-      storageManager.updateNote(editingNote.id, title, content, null, tags, category);
-    } else {
-      storageManager.createNote(title, content);
-      // Após criar, precisamos atualizar a nota com categoria e tags se houver
-      const all = storageManager.getAllNotes();
-      const newNote = all[0]; // A mais recente
-      storageManager.updateNote(newNote.id, title, content, null, tags, category);
+      if (editingNote) {
+        storageManager.updateNote(editingNote.id, title, content, null, tags, category);
+      } else {
+        // Pegamos a nota diretamente do retorno da criação
+        const novaNota = storageManager.createNote(title, content);
+        
+        // Extrai o ID de forma segura, seja como propriedade genérica ou como método da classe
+        const noteId = novaNota?.id || (typeof novaNota?.getId === 'function' ? novaNota.getId() : null);
+        
+        if (noteId) {
+          storageManager.updateNote(noteId, title, content, null, tags, category);
+        } else {
+          // Se o NoteManager não retornar a nota direito, avisamos ao invés de travar
+          throw new Error("O gerenciador não retornou um ID válido para a nova nota.");
+        }
+      }
+      
+      refreshNotes();
+      navigate('home');
+    } catch (error) {
+      console.error("Erro interno ao salvar a nota:", error);
+      alert("Erro ao salvar a nota! Abra o Console (F12) para ver os detalhes do problema.");
     }
-    refreshNotes();
-    navigate('home');
   };
 
   const handleDeleteNote = (id) => {
@@ -165,9 +179,9 @@ export default function App() {
                   <p className="text-gray-600 mb-4 line-clamp-3">{note.content}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {note.category && <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{note.category}</span>}
-                    {note.tags.map(tag => <span key={tag} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">#{tag}</span>)}
+                    {note.tags && note.tags.map && note.tags.map(tag => <span key={tag} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">#{tag}</span>)}
                   </div>
-                  <p className="text-xs text-gray-400 font-medium italic">{new Date(note.lastModificationDate).toLocaleString('pt-BR')}</p>
+                  <p className="text-xs text-gray-400 font-medium italic">{note.lastModificationDate ? new Date(note.lastModificationDate).toLocaleString('pt-BR') : ''}</p>
                 </div>
               ))}
             </div>
@@ -186,7 +200,7 @@ export default function App() {
               <button type="button" onClick={() => alert('Simulação: Texto convertido de áudio com sucesso!')} className="w-full bg-indigo-500 text-white p-4 rounded-xl hover:bg-indigo-600 font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-md"><Mic size={22} /> Áudio para Texto (Simulação)</button>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input name="category" defaultValue={editingNote?.category} placeholder="Categoria (ex: Trabalho)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
-                <input name="tags" defaultValue={editingNote?.tags?.join(', ')} placeholder="Tags (separadas por vírgula)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+                <input name="tags" defaultValue={editingNote?.tags ? (Array.isArray(editingNote.tags) ? editingNote.tags.join(', ') : editingNote.tags) : ''} placeholder="Tags (separadas por vírgula)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div className="flex gap-4 pt-4">
                 <button type="submit" className="flex-1 bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 font-bold flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95"><Save size={22} /> Salvar Nota</button>
@@ -213,6 +227,3 @@ export default function App() {
           </div>
         )}
       </main>
-    </div>
-  );
-}
