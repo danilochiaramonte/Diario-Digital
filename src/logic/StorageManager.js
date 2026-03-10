@@ -17,29 +17,46 @@ class StorageManager {
   }
 
   loadFromStorage() {
+    // 1. Carrega Usuários com Try/Catch isolado
     try {
       const usersData = localStorage.getItem(this.USERS_KEY);
       if (usersData) {
-        const users = JSON.parse(usersData);
-        this.userManager.users = new Map(users);
+        const parsedUsers = JSON.parse(usersData);
+        // Garante que é um formato válido antes de jogar no Map
+        this.userManager.users = new Map(Array.isArray(parsedUsers) ? parsedUsers : []);
       }
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
+      this.userManager.users = new Map(); // Estado limpo em caso de falha
+    }
 
+    // 2. Carrega Notas com Try/Catch isolado
+    try {
       const notesData = localStorage.getItem(this.NOTES_KEY);
       if (notesData) {
-        const notes = JSON.parse(notesData);
-        this.noteManager.notes = new Map(notes);
+        const parsedNotes = JSON.parse(notesData);
+        this.noteManager.notes = new Map(Array.isArray(parsedNotes) ? parsedNotes : []);
       }
+    } catch (error) {
+      console.error('Erro ao carregar notas:', error);
+      this.noteManager.notes = new Map();
+    }
 
+    // 3. Carrega Sessão Atual com Try/Catch isolado
+    try {
       const currentUserData = localStorage.getItem(this.CURRENT_USER_KEY);
       if (currentUserData) {
         const userData = JSON.parse(currentUserData);
-        const user = this.userManager.users.get(userData.username);
-        if (user) {
-          this.userManager.loggedInUser = user;
+        if (userData && userData.username && this.userManager.users instanceof Map) {
+          const user = this.userManager.users.get(userData.username);
+          if (user) {
+            this.userManager.loggedInUser = user;
+          }
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+      console.error('Erro ao carregar sessão do usuário:', error);
+      this.userManager.loggedInUser = null;
     }
   }
 
@@ -67,8 +84,14 @@ class StorageManager {
 
   saveCurrentUserToStorage() {
     if (this.userManager.loggedInUser) {
-      const userData = { username: this.userManager.loggedInUser.getUsername() };
-      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(userData));
+      // Se a classe de usuário tiver o método getUsername(), usa ele. Senão, tenta a propriedade direta.
+      const username = typeof this.userManager.loggedInUser.getUsername === 'function' 
+        ? this.userManager.loggedInUser.getUsername() 
+        : this.userManager.loggedInUser.username;
+        
+      if (username) {
+        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify({ username }));
+      }
     } else {
       localStorage.removeItem(this.CURRENT_USER_KEY);
     }
@@ -129,10 +152,10 @@ class StorageManager {
     if (!keyword) return all;
     const lower = keyword.toLowerCase();
     return all.filter(n => 
-      n.title.toLowerCase().includes(lower) || 
-      n.content.toLowerCase().includes(lower) ||
+      (n.title && n.title.toLowerCase().includes(lower)) || 
+      (n.content && n.content.toLowerCase().includes(lower)) ||
       (n.category && n.category.toLowerCase().includes(lower)) ||
-      n.tags.some(t => t.toLowerCase().includes(lower))
+      (n.tags && n.tags.some(t => t.toLowerCase().includes(lower)))
     );
   }
 
