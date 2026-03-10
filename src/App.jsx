@@ -5,22 +5,39 @@ import StorageManager from './logic/StorageManager';
 const storageManager = new StorageManager();
 
 // Componente de Navegação
+// Componente de Navegação Corrigido
 const Navbar = ({ currentPage, navigate, onLogout, isLoggedIn }) => (
-  <div className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-10">
-    {currentPage === 'home' ? (
-      <h1 className="text-xl font-bold">Diário Digital</h1>
-    ) : (
-      <button onClick={() => navigate('home')} className="flex items-center text-lg font-semibold hover:opacity-80">
-        <ArrowLeft className="mr-2" size={20} /> Voltar
-      </button>
-    )}
-    <div className="flex items-center gap-2">
-      {isLoggedIn && currentPage === 'home' && (
+  <div className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
+    <div className="flex items-center">
+      {currentPage !== 'home' && (
+        <button 
+          onClick={() => navigate('home')} 
+          className="mr-4 p-2 hover:bg-blue-500 rounded-full transition-all active:scale-95"
+        >
+          <ArrowLeft size={24} />
+        </button>
+      )}
+      <h1 className="text-xl font-bold tracking-tight">Diário Digital</h1>
+    </div>
+    
+    <div className="flex items-center gap-3">
+      {isLoggedIn && (
         <>
-          <button onClick={() => navigate('about')} className="p-2 hover:bg-blue-500 rounded transition" title="Sobre">
+          <button 
+            onClick={() => navigate('about')} 
+            className="p-2 hover:bg-blue-500 rounded-full transition-all active:scale-95" 
+            title="Sobre"
+          >
             <Info size={24} />
           </button>
-          <button onClick={onLogout} className="p-2 hover:bg-red-500 rounded transition" title="Sair">
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              onLogout();
+            }} 
+            className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-all shadow-sm active:scale-95 flex items-center justify-center" 
+            title="Sair"
+          >
             <LogOut size={24} />
           </button>
         </>
@@ -28,6 +45,7 @@ const Navbar = ({ currentPage, navigate, onLogout, isLoggedIn }) => (
     </div>
   </div>
 );
+
 
 // Tela Sobre
 const AboutScreen = () => (
