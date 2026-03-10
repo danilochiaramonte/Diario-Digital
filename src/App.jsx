@@ -9,14 +9,10 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notes, setNotes] = useState([]);
   const [editingNote, setEditingNote] = useState(null);
-
-  // Função de Logout Blindada
-  const handleLogout = () => {
-    localStorage.removeItem('diario_usuario_logado');
-    storageManager.logout();
-    // Força o recarregamento total da página para a URL base
-    window.location.href = window.location.origin;
-  };
+  const [loginUser, setLoginUser] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+  const [regUser, setRegUser] = useState('');
+  const [regPass, setRegPass] = useState('');
 
   const refreshNotes = useCallback(() => {
     const allNotes = storageManager.getAllNotes();
@@ -31,10 +27,31 @@ export default function App() {
     }
   }, [refreshNotes]);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setCurrentPage('home');
-    refreshNotes();
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (storageManager.login(loginUser, loginPass)) {
+      setIsLoggedIn(true);
+      setCurrentPage('home');
+      refreshNotes();
+    } else {
+      alert('Usuário ou senha inválidos');
+    }
+  };
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    if (storageManager.registerUser(regUser, regPass)) {
+      alert('Cadastro realizado com sucesso!');
+      setCurrentPage('login');
+    } else {
+      alert('Erro ao cadastrar. Usuário já existe?');
+    }
+  };
+
+  const handleLogout = () => {
+    storageManager.logout();
+    localStorage.removeItem('diario_usuario_logado');
+    window.location.href = window.location.origin;
   };
 
   const navigate = (page, note = null) => {
@@ -43,11 +60,21 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
-  const handleSaveNote = (id, title, content, tags, category) => {
-    if (id) {
-      storageManager.updateNote(id, title, content, null, tags, category);
+  const handleSaveNote = (e) => {
+    e.preventDefault();
+    const title = e.target.title.value;
+    const content = e.target.content.value;
+    const category = e.target.category.value;
+    const tags = e.target.tags.value.split(',').map(t => t.trim()).filter(t => t);
+
+    if (editingNote) {
+      storageManager.updateNote(editingNote.id, title, content, null, tags, category);
     } else {
       storageManager.createNote(title, content);
+      // Após criar, precisamos atualizar a nota com categoria e tags se houver
+      const all = storageManager.getAllNotes();
+      const newNote = all[0]; // A mais recente
+      storageManager.updateNote(newNote.id, title, content, null, tags, category);
     }
     refreshNotes();
     navigate('home');
@@ -62,7 +89,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      {/* Navbar Integrada para evitar erros de prop-drilling */}
       {isLoggedIn && (
         <div className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
           <div className="flex items-center">
@@ -85,15 +111,9 @@ export default function App() {
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm border-t-8 border-blue-600">
               <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">Login</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const user = e.target.username.value;
-                const pass = e.target.password.value;
-                if (storageManager.login(user, pass)) handleLogin();
-                else alert('Usuário ou senha inválidos');
-              }} className="space-y-4">
-                <input name="username" type="text" placeholder="Usuário" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" required />
-                <input name="password" type="password" placeholder="Senha" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" required />
+              <form onSubmit={handleLogin} className="space-y-4">
+                <input type="text" placeholder="Usuário" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" value={loginUser} onChange={(e) => setLoginUser(e.target.value)} required />
+                <input type="password" placeholder="Senha" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" value={loginPass} onChange={(e) => setLoginPass(e.target.value)} required />
                 <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-bold transition shadow-lg">Entrar</button>
               </form>
               <p className="mt-6 text-center text-sm">Não tem conta? <button onClick={() => navigate('register')} className="text-blue-600 font-bold hover:underline">Cadastre-se</button></p>
@@ -105,15 +125,9 @@ export default function App() {
           <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm border-t-8 border-green-600">
               <h2 className="text-3xl font-bold text-center text-green-700 mb-6">Cadastro</h2>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const user = e.target.username.value;
-                const pass = e.target.password.value;
-                if (storageManager.registerUser(user, pass)) navigate('login');
-                else alert('Erro ao cadastrar');
-              }} className="space-y-4">
-                <input name="username" type="text" placeholder="Usuário" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500" required />
-                <input name="password" type="password" placeholder="Senha" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500" required />
+              <form onSubmit={handleRegister} className="space-y-4">
+                <input type="text" placeholder="Usuário" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500" value={regUser} onChange={(e) => setRegUser(e.target.value)} required />
+                <input type="password" placeholder="Senha" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500" value={regPass} onChange={(e) => setRegPass(e.target.value)} required />
                 <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 font-bold transition shadow-lg">Cadastrar</button>
               </form>
               <p className="mt-6 text-center text-sm">Já tem conta? <button onClick={() => navigate('login')} className="text-blue-600 font-bold hover:underline">Login</button></p>
@@ -155,14 +169,7 @@ export default function App() {
         {isLoggedIn && currentPage === 'edit-note' && (
           <div className="p-6 max-w-2xl mx-auto">
             <h2 className="text-3xl font-bold text-blue-800 mb-8">{editingNote ? 'Editar Nota' : 'Nova Nota'}</h2>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const title = e.target.title.value;
-              const content = e.target.content.value;
-              const category = e.target.category.value;
-              const tags = e.target.tags.value.split(',').map(t => t.trim()).filter(t => t);
-              handleSaveNote(editingNote?.id, title, content, tags, category);
-            }} className="space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+            <form onSubmit={handleSaveNote} className="space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
               <input name="title" defaultValue={editingNote?.title} placeholder="Título da Nota" className="w-full p-4 text-xl font-bold border-b-2 border-gray-100 outline-none focus:border-blue-500 transition-all" required />
               <textarea name="content" defaultValue={editingNote?.content} rows="10" placeholder="Escreva aqui suas ideias..." className="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none" required></textarea>
               <button type="button" onClick={() => alert('Simulação: Texto convertido de áudio com sucesso!')} className="w-full bg-indigo-500 text-white p-4 rounded-xl hover:bg-indigo-600 font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-md"><Mic size={22} /> Áudio para Texto (Simulação)</button>
