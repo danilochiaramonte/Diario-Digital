@@ -4,349 +4,23 @@ import StorageManager from './logic/StorageManager';
 
 const storageManager = new StorageManager();
 
-// Componente de Navegação
-// Componente de Navegação Corrigido
-const Navbar = ({ currentPage, navigate, onLogout, isLoggedIn }) => (
-  <div className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
-    <div className="flex items-center">
-      {currentPage !== 'home' && (
-        <button 
-          onClick={() => navigate('home')} 
-          className="mr-4 p-2 hover:bg-blue-500 rounded-full transition-all active:scale-95"
-        >
-          <ArrowLeft size={24} />
-        </button>
-      )}
-      <h1 className="text-xl font-bold tracking-tight">Diário Digital</h1>
-    </div>
-    
-    <div className="flex items-center gap-3">
-      {isLoggedIn && (
-        <>
-          <button 
-            onClick={() => navigate('about')} 
-            className="p-2 hover:bg-blue-500 rounded-full transition-all active:scale-95" 
-            title="Sobre"
-          >
-            <Info size={24} />
-          </button>
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              onLogout();
-            }} 
-            className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-all shadow-sm active:scale-95 flex items-center justify-center" 
-            title="Sair"
-          >
-            <LogOut size={24} />
-          </button>
-        </>
-      )}
-    </div>
-  </div>
-);
-
-
-// Tela Sobre
-const AboutScreen = () => (
-  <div className="p-6 text-gray-700 max-w-2xl mx-auto">
-    <h2 className="text-2xl font-bold mb-4 text-blue-800">Sobre o Diário Digital</h2>
-    <p className="mb-4 text-justify leading-relaxed">
-      Este aplicativo foi desenvolvido como parte da atividade prática da disciplina de 
-      Desenvolvimento de Aplicativos Móveis, adaptado para ser um Diário Digital 
-      com funcionalidades avançadas de organização e categorização de anotações.
-    </p>
-    <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-blue-600">
-      <h3 className="font-bold mb-2 text-blue-700">Tecnologias Utilizadas:</h3>
-      <ul className="list-disc list-inside space-y-1 text-sm">
-        <li>React 18+ com Vite</li>
-        <li>Tailwind CSS (Estilização)</li>
-        <li>Lucide React (Ícones)</li>
-        <li>Web Storage API (localStorage)</li>
-        <li>Simulação de IA para categorização e áudio-para-texto</li>
-      </ul>
-    </div>
-    <p className="text-sm text-gray-500 mt-8 text-center">Versão 1.0.0 - 2026</p>
-  </div>
-);
-
-// Tela de Login
-const LoginScreen = ({ onLogin, navigate }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-    if (!username.trim() || !password.trim()) {
-      setError('Por favor, preencha todos os campos.');
-      return;
-    }
-    const success = storageManager.login(username, password);
-    if (success) {
-      onLogin();
-    } else {
-      setError('Nome de usuário ou senha inválidos.');
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm border-t-4 border-blue-600">
-        <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">Login</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-            <input
-              type="text"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input
-              type="password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</p>}
-          <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-semibold transition">
-            Entrar
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Não tem uma conta? <button onClick={() => navigate('register')} className="text-blue-600 hover:underline font-semibold">Cadastre-se</button>
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// Tela de Registro
-const RegisterScreen = ({ onRegister, navigate }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-    if (!username.trim() || !password.trim() || !confirmPassword.trim()) {
-      setError('Por favor, preencha todos os campos.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem.');
-      return;
-    }
-    const success = storageManager.registerUser(username, password);
-    if (success) {
-      onRegister();
-    } else {
-      setError('Nome de usuário já existe.');
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-4">
-      <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-sm border-t-4 border-green-600">
-        <h2 className="text-3xl font-bold text-center text-green-700 mb-6">Cadastro</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-            <input
-              type="text"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input
-              type="password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
-            <input
-              type="password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">{error}</p>}
-          <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 font-semibold transition">
-            Cadastrar
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-gray-600">
-          Já tem uma conta? <button onClick={() => navigate('login')} className="text-blue-600 hover:underline font-semibold">Login</button>
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// Tela Principal (Diário)
-const HomeScreen = ({ navigate, notes, onDeleteNote }) => {
-  const [filterKeyword, setFilterKeyword] = useState('');
-  const [displayNotes, setDisplayNotes] = useState(notes);
-
-  useEffect(() => {
-    if (filterKeyword.trim() === '') {
-      setDisplayNotes(notes);
-    } else {
-      const filtered = storageManager.searchNotes(filterKeyword);
-      setDisplayNotes(filtered);
-    }
-  }, [filterKeyword, notes]);
-
-  return (
-    <div className="pb-32">
-      <div className="p-4 max-w-4xl mx-auto">
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Buscar notas..."
-            className="w-full p-3 pl-10 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-200 outline-none shadow-sm"
-            value={filterKeyword}
-            onChange={(e) => setFilterKeyword(e.target.value)}
-          />
-        </div>
-
-        {displayNotes.length === 0 ? (
-          <div className="text-center text-gray-400 mt-16 py-12">
-            <p className="text-lg font-semibold">Nenhuma nota encontrada.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayNotes.map((note) => (
-              <div key={note.id} className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-400 hover:shadow-lg transition">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-lg text-gray-800 flex-1 cursor-pointer" onClick={() => navigate('edit-note', note)}>
-                    {note.title}
-                  </h3>
-                  <div className="flex gap-1">
-                    <button onClick={() => navigate('edit-note', note)} className="text-blue-500 p-1"><Edit size={18} /></button>
-                    <button onClick={() => onDeleteNote(note.id)} className="text-red-500 p-1"><Trash2 size={18} /></button>
-                  </div>
-                </div>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-3">{note.content}</p>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {note.category && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-semibold">{note.category}</span>}
-                  {note.tags && note.tags.map(tag => <span key={tag} className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs">#{tag}</span>)}
-                </div>
-                <p className="text-xs text-gray-400">{new Date(note.lastModificationDate).toLocaleString('pt-BR')}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 border-t shadow-lg flex justify-center">
-        <button onClick={() => navigate('edit-note', null)} className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 shadow-md font-semibold flex items-center gap-2">
-          <Plus size={20} /> Nova Nota
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Tela de Edição/Criação de Nota
-const NoteEditorScreen = ({ note, onSave, navigate }) => {
-  const [title, setTitle] = useState(note ? note.title : '');
-  const [content, setContent] = useState(note ? note.content : '');
-  const [tagsInput, setTagsInput] = useState(note && note.tags ? note.tags.join(', ') : '');
-  const [category, setCategory] = useState(note ? note.category : '');
-  const [error, setError] = useState('');
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) {
-      setError('Título e conteúdo não podem ser vazios.');
-      return;
-    }
-    const tagsArray = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
-    onSave(note ? note.id : null, title, content, tagsArray, category);
-  };
-
-  return (
-    <div className="p-4 max-w-2xl mx-auto pb-20">
-      <h2 className="text-2xl font-bold text-blue-700 mb-6">{note ? 'Editar Nota' : 'Nova Nota'}</h2>
-      <form onSubmit={handleSave} className="space-y-4">
-        <input
-          type="text"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          placeholder="Título *"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <textarea
-          rows="8"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-          placeholder="Conteúdo *"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        ></textarea>
-        {/* Bloco de botões de IA - Botão de Sugerir Categoria Removido */}
-       <div className="grid grid-cols-1 gap-2">
-       <button 
-       type="button" 
-       onClick={() => setContent(prev => prev + (prev ? '\n\n' : '') + storageManager.convertAudioToText())} 
-       className="bg-indigo-500 text-white p-3 rounded-lg hover:bg-indigo-600 font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
-       >
-       <Mic size={18} /> Áudio para Texto (Simulação)
-    </button>
- </div>
- 
-        <input
-          type="text"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          placeholder="Categoria"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
-        <input
-          type="text"
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          placeholder="Tags (separadas por vírgula)"
-          value={tagsInput}
-          onChange={(e) => setTagsInput(e.target.value)}
-        />
-        {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
-        <div className="flex gap-4 mt-6">
-          <button type="submit" className="flex-1 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-semibold flex items-center justify-center gap-2">
-            <Save size={20} /> Salvar Nota
-          </button>
-          <button type="button" onClick={() => navigate('home')} className="flex-1 bg-gray-300 text-gray-800 p-3 rounded-lg hover:bg-gray-400 font-semibold flex items-center justify-center gap-2">
-            <X size={20} /> Cancelar
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-};
-
-// Componente Principal
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [notes, setNotes] = useState([]);
   const [editingNote, setEditingNote] = useState(null);
 
+  // Função de Logout Blindada
+  const handleLogout = () => {
+    localStorage.removeItem('diario_usuario_logado');
+    storageManager.logout();
+    // Força o recarregamento total da página para a URL base
+    window.location.href = window.location.origin;
+  };
+
   const refreshNotes = useCallback(() => {
-    setNotes(storageManager.getAllNotes());
+    const allNotes = storageManager.getAllNotes();
+    setNotes(allNotes);
   }, []);
 
   useEffect(() => {
@@ -361,13 +35,6 @@ export default function App() {
     setIsLoggedIn(true);
     setCurrentPage('home');
     refreshNotes();
-  };
-
-  const handleLogout = () => {
-    storageManager.logout();
-    setIsLoggedIn(false);
-    setCurrentPage('login');
-    setNotes([]);
   };
 
   const navigate = (page, note = null) => {
@@ -395,13 +62,138 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
-      {isLoggedIn && <Navbar currentPage={currentPage} navigate={navigate} onLogout={handleLogout} isLoggedIn={isLoggedIn} />}
-      <main>
-        {currentPage === 'login' && !isLoggedIn && <LoginScreen onLogin={handleLogin} navigate={navigate} />}
-        {currentPage === 'register' && !isLoggedIn && <RegisterScreen onRegister={() => setCurrentPage('login')} navigate={navigate} />}
-        {isLoggedIn && currentPage === 'home' && <HomeScreen navigate={navigate} notes={notes} onDeleteNote={handleDeleteNote} />}
-        {isLoggedIn && currentPage === 'edit-note' && <NoteEditorScreen note={editingNote} onSave={handleSaveNote} navigate={navigate} />}
-        {currentPage === 'about' && <AboutScreen />}
+      {/* Navbar Integrada para evitar erros de prop-drilling */}
+      {isLoggedIn && (
+        <div className="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-50">
+          <div className="flex items-center">
+            {currentPage !== 'home' && (
+              <button onClick={() => navigate('home')} className="mr-4 p-2 hover:bg-blue-500 rounded-full transition-all">
+                <ArrowLeft size={24} />
+              </button>
+            )}
+            <h1 className="text-xl font-bold">Diário Digital</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('about')} className="p-2 hover:bg-blue-500 rounded-full transition-all" title="Sobre"><Info size={24} /></button>
+            <button onClick={handleLogout} className="p-2 bg-red-500 hover:bg-red-600 rounded-lg transition-all shadow-md flex items-center justify-center" title="Sair"><LogOut size={24} /></button>
+          </div>
+        </div>
+      )}
+
+      <main className="container mx-auto max-w-4xl">
+        {currentPage === 'login' && !isLoggedIn && (
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm border-t-8 border-blue-600">
+              <h2 className="text-3xl font-bold text-center text-blue-700 mb-6">Login</h2>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const user = e.target.username.value;
+                const pass = e.target.password.value;
+                if (storageManager.login(user, pass)) handleLogin();
+                else alert('Usuário ou senha inválidos');
+              }} className="space-y-4">
+                <input name="username" type="text" placeholder="Usuário" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" required />
+                <input name="password" type="password" placeholder="Senha" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" required />
+                <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 font-bold transition shadow-lg">Entrar</button>
+              </form>
+              <p className="mt-6 text-center text-sm">Não tem conta? <button onClick={() => navigate('register')} className="text-blue-600 font-bold hover:underline">Cadastre-se</button></p>
+            </div>
+          </div>
+        )}
+
+        {currentPage === 'register' && !isLoggedIn && (
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <div className="bg-white p-8 rounded-xl shadow-2xl w-full max-w-sm border-t-8 border-green-600">
+              <h2 className="text-3xl font-bold text-center text-green-700 mb-6">Cadastro</h2>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                const user = e.target.username.value;
+                const pass = e.target.password.value;
+                if (storageManager.registerUser(user, pass)) navigate('login');
+                else alert('Erro ao cadastrar');
+              }} className="space-y-4">
+                <input name="username" type="text" placeholder="Usuário" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500" required />
+                <input name="password" type="password" placeholder="Senha" className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-green-500" required />
+                <button type="submit" className="w-full bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 font-bold transition shadow-lg">Cadastrar</button>
+              </form>
+              <p className="mt-6 text-center text-sm">Já tem conta? <button onClick={() => navigate('login')} className="text-blue-600 font-bold hover:underline">Login</button></p>
+            </div>
+          </div>
+        )}
+
+        {isLoggedIn && currentPage === 'home' && (
+          <div className="p-4 pb-32">
+            <div className="relative mb-8">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <input type="text" placeholder="Buscar notas..." className="w-full p-4 pl-12 border rounded-full shadow-sm outline-none focus:ring-2 focus:ring-blue-300" onChange={(e) => setNotes(storageManager.searchNotes(e.target.value))} />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {notes.map(note => (
+                <div key={note.id} className="bg-white p-5 rounded-xl shadow-md border-l-8 border-blue-500 hover:shadow-xl transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-bold text-xl text-gray-800 cursor-pointer" onClick={() => navigate('edit-note', note)}>{note.title}</h3>
+                    <div className="flex gap-2">
+                      <button onClick={() => navigate('edit-note', note)} className="text-blue-500 hover:bg-blue-50 p-2 rounded-full"><Edit size={20} /></button>
+                      <button onClick={() => handleDeleteNote(note.id)} className="text-red-500 hover:bg-red-50 p-2 rounded-full"><Trash2 size={20} /></button>
+                    </div>
+                  </div>
+                  <p className="text-gray-600 mb-4 line-clamp-3">{note.content}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {note.category && <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{note.category}</span>}
+                    {note.tags.map(tag => <span key={tag} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-medium">#{tag}</span>)}
+                  </div>
+                  <p className="text-xs text-gray-400 font-medium italic">{new Date(note.lastModificationDate).toLocaleString('pt-BR')}</p>
+                </div>
+              ))}
+            </div>
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2">
+              <button onClick={() => navigate('edit-note', null)} className="bg-blue-600 text-white px-10 py-4 rounded-full hover:bg-blue-700 shadow-2xl font-bold flex items-center gap-3 transition-all hover:scale-105 active:scale-95"><Plus size={24} /> Nova Nota</button>
+            </div>
+          </div>
+        )}
+
+        {isLoggedIn && currentPage === 'edit-note' && (
+          <div className="p-6 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-blue-800 mb-8">{editingNote ? 'Editar Nota' : 'Nova Nota'}</h2>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const title = e.target.title.value;
+              const content = e.target.content.value;
+              const category = e.target.category.value;
+              const tags = e.target.tags.value.split(',').map(t => t.trim()).filter(t => t);
+              handleSaveNote(editingNote?.id, title, content, tags, category);
+            }} className="space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+              <input name="title" defaultValue={editingNote?.title} placeholder="Título da Nota" className="w-full p-4 text-xl font-bold border-b-2 border-gray-100 outline-none focus:border-blue-500 transition-all" required />
+              <textarea name="content" defaultValue={editingNote?.content} rows="10" placeholder="Escreva aqui suas ideias..." className="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none" required></textarea>
+              <button type="button" onClick={() => alert('Simulação: Texto convertido de áudio com sucesso!')} className="w-full bg-indigo-500 text-white p-4 rounded-xl hover:bg-indigo-600 font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-md"><Mic size={22} /> Áudio para Texto (Simulação)</button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input name="category" defaultValue={editingNote?.category} placeholder="Categoria (ex: Trabalho)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+                <input name="tags" defaultValue={editingNote?.tags?.join(', ')} placeholder="Tags (separadas por vírgula)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div className="flex gap-4 pt-4">
+                <button type="submit" className="flex-1 bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 font-bold flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95"><Save size={22} /> Salvar Nota</button>
+                <button type="button" onClick={() => navigate('home')} className="flex-1 bg-gray-200 text-gray-700 p-4 rounded-xl hover:bg-gray-300 font-bold transition-all active:scale-95">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {currentPage === 'about' && (
+          <div className="p-8 max-w-2xl mx-auto bg-white rounded-2xl shadow-xl mt-10 border-t-8 border-blue-600">
+            <h2 className="text-3xl font-bold mb-6 text-blue-800">Sobre o Diário Digital</h2>
+            <p className="mb-6 text-lg leading-relaxed text-gray-600">Este aplicativo foi desenvolvido como parte da atividade prática da disciplina de Desenvolvimento de Aplicativos Móveis (Extensão III).</p>
+            <div className="bg-blue-50 p-6 rounded-xl mb-6">
+              <h3 className="font-bold mb-4 text-blue-700 text-xl">Recursos do Sistema:</h3>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Persistência Local (Offline-first)</li>
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Organização por Categorias e Tags</li>
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Busca Inteligente de Notas</li>
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Simulação de IA para Áudio</li>
+              </ul>
+            </div>
+            <button onClick={() => navigate('home')} className="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg">Voltar ao Diário</button>
+          </div>
+        )}
       </main>
     </div>
   );
