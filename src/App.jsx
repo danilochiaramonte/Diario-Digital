@@ -13,6 +13,10 @@ export default function App() {
   const [loginPass, setLoginPass] = useState('');
   const [regUser, setRegUser] = useState('');
   const [regPass, setRegPass] = useState('');
+  
+  // Novos estados para controlar o texto e o microfone
+  const [noteContent, setNoteContent] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
 
   const refreshNotes = useCallback(() => {
     const allNotes = storageManager.getAllNotes();
@@ -65,15 +69,56 @@ export default function App() {
 
   const navigate = (page, note = null) => {
     setEditingNote(note);
+    // Quando abrir a tela de edição, carrega o texto da nota no estado (ou deixa vazio se for nova)
+    if (page === 'edit-note') {
+      setNoteContent(note ? note.content : '');
+    }
     setCurrentPage(page);
     window.scrollTo(0, 0);
+  };
+
+  // --- Nova Função: Reconhecimento de Voz ---
+  const startRecording = () => {
+    // Verifica se o navegador tem suporte à API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      alert("Seu navegador não suporta a gravação de áudio nativa. Tente usar o Google Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'pt-BR'; // Força o reconhecimento em Português do Brasil
+    recognition.continuous = false; // Para de gravar automaticamente quando você faz uma pausa
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      // Adiciona o texto falado ao conteúdo que já estava lá (com um espaço antes)
+      setNoteContent((prev) => prev ? prev + ' ' + transcript : transcript);
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Erro no reconhecimento de voz:", event.error);
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
   };
 
   const handleSaveNote = (e) => {
     e.preventDefault();
     try {
       const title = e.target.title.value;
-      const content = e.target.content.value;
+      const content = noteContent; // Agora pega do estado controlado
       const category = e.target.category.value;
       const tags = e.target.tags.value.split(',').map(t => t.trim()).filter(t => t);
 
@@ -189,8 +234,32 @@ export default function App() {
             <h2 className="text-3xl font-bold text-blue-800 mb-8">{editingNote ? 'Editar Nota' : 'Nova Nota'}</h2>
             <form onSubmit={handleSaveNote} className="space-y-6 bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
               <input name="title" defaultValue={editingNote?.title} placeholder="Título da Nota" className="w-full p-4 text-xl font-bold border-b-2 border-gray-100 outline-none focus:border-blue-500 transition-all" required />
-              <textarea name="content" defaultValue={editingNote?.content} rows="10" placeholder="Escreva aqui suas ideias..." className="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none" required></textarea>
-              <button type="button" onClick={() => alert('Simulação: Texto convertido de áudio com sucesso!')} className="w-full bg-indigo-500 text-white p-4 rounded-xl hover:bg-indigo-600 font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-md"><Mic size={22} /> Áudio para Texto (Simulação)</button>
+              
+              {/* Textarea agora é controlada pelo estado noteContent */}
+              <textarea 
+                name="content" 
+                value={noteContent} 
+                onChange={(e) => setNoteContent(e.target.value)} 
+                rows="10" 
+                placeholder="Escreva aqui suas ideias..." 
+                className="w-full p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none" 
+                required
+              ></textarea>
+              
+              {/* Botão de gravação real com feedback visual */}
+              <button 
+                type="button" 
+                onClick={startRecording} 
+                className={`w-full p-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all active:scale-95 shadow-md ${
+                  isRecording 
+                    ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' 
+                    : 'bg-indigo-500 hover:bg-indigo-600 text-white'
+                }`}
+              >
+                <Mic size={22} /> 
+                {isRecording ? 'Ouvindo... (Fale agora)' : 'Áudio para Texto'}
+              </button>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input name="category" defaultValue={editingNote?.category} placeholder="Categoria (ex: Trabalho)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
                 <input name="tags" defaultValue={editingNote?.tags ? (Array.isArray(editingNote.tags) ? editingNote.tags.join(', ') : editingNote.tags) : ''} placeholder="Tags (separadas por vírgula)" className="p-4 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500" />
@@ -213,7 +282,7 @@ export default function App() {
                 <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Persistência Local (Offline-first)</li>
                 <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Organização por Categorias e Tags</li>
                 <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Busca Inteligente de Notas</li>
-                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Simulação de IA para Áudio</li>
+                <li className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> Reconhecimento de Voz Nativo</li>
               </ul>
             </div>
             <button onClick={() => navigate('home')} className="w-full bg-blue-600 text-white p-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg">Voltar ao Diário</button>
