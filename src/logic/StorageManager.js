@@ -1,8 +1,6 @@
 /**
  * StorageManager.js
  * Gerencia a persistência de dados em localStorage para o Diário Digital.
- * Integra as classes de lógica de negócio (User, Note, Category, UserManager, NoteManager)
- * com o armazenamento local do navegador.
  */
 
 import UserManager from './UserManager';
@@ -18,26 +16,20 @@ class StorageManager {
     this.loadFromStorage();
   }
 
-  /**
-   * Carrega os dados do localStorage e reconstrói os objetos de usuários e anotações.
-   */
   loadFromStorage() {
     try {
-      // Carregar usuários
       const usersData = localStorage.getItem(this.USERS_KEY);
       if (usersData) {
         const users = JSON.parse(usersData);
         this.userManager.users = new Map(users);
       }
 
-      // Carregar anotações
       const notesData = localStorage.getItem(this.NOTES_KEY);
       if (notesData) {
         const notes = JSON.parse(notesData);
         this.noteManager.notes = new Map(notes);
       }
 
-      // Carregar usuário logado
       const currentUserData = localStorage.getItem(this.CURRENT_USER_KEY);
       if (currentUserData) {
         const userData = JSON.parse(currentUserData);
@@ -47,198 +39,105 @@ class StorageManager {
         }
       }
     } catch (error) {
-      console.error('Erro ao carregar dados do localStorage:', error);
+      console.error('Erro ao carregar dados:', error);
     }
   }
 
-  /**
-   * Salva os dados de usuários no localStorage.
-   */
   saveUsersToStorage() {
-    try {
-      const usersArray = Array.from(this.userManager.users.entries());
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(usersArray));
-    } catch (error) {
-      console.error('Erro ao salvar usuários no localStorage:', error);
-    }
+    const usersArray = Array.from(this.userManager.users.entries());
+    localStorage.setItem(this.USERS_KEY, JSON.stringify(usersArray));
   }
 
-  /**
-   * Salva os dados de anotações no localStorage.
-   */
   saveNotesToStorage() {
-    try {
-      const notesArray = Array.from(this.noteManager.notes.entries()).map(([id, note]) => [
-        id,
-        {
-          id: note.getId(),
-          title: note.getTitle(),
-          content: note.getContent(),
-          creationDate: note.getCreationDate(),
-          lastModificationDate: note.getLastModificationDate(),
-          color: note.getColor(),
-          tags: Array.from(note.tags),
-          category: note.getCategory(),
-        },
-      ]);
-      localStorage.setItem(this.NOTES_KEY, JSON.stringify(notesArray));
-    } catch (error) {
-      console.error('Erro ao salvar anotações no localStorage:', error);
-    }
+    const notesArray = Array.from(this.noteManager.notes.entries()).map(([id, note]) => [
+      id,
+      {
+        id: note.id || id,
+        title: typeof note.getTitle === 'function' ? note.getTitle() : note.title,
+        content: typeof note.getContent === 'function' ? note.getContent() : note.content,
+        creationDate: typeof note.getCreationDate === 'function' ? note.getCreationDate() : note.creationDate,
+        lastModificationDate: typeof note.getLastModificationDate === 'function' ? note.getLastModificationDate() : note.lastModificationDate,
+        color: typeof note.getColor === 'function' ? note.getColor() : note.color,
+        tags: Array.from(note.tags || []),
+        category: typeof note.getCategory === 'function' ? note.getCategory() : note.category,
+      },
+    ]);
+    localStorage.setItem(this.NOTES_KEY, JSON.stringify(notesArray));
   }
 
-  /**
-   * Salva o usuário logado no localStorage.
-   */
   saveCurrentUserToStorage() {
-    try {
-      if (this.userManager.loggedInUser) {
-        const userData = {
-          username: this.userManager.loggedInUser.getUsername(),
-        };
-        localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(userData));
-      } else {
-        localStorage.removeItem(this.CURRENT_USER_KEY);
-      }
-    } catch (error) {
-      console.error('Erro ao salvar usuário logado no localStorage:', error);
+    if (this.userManager.loggedInUser) {
+      const userData = { username: this.userManager.loggedInUser.getUsername() };
+      localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(userData));
+    } else {
+      localStorage.removeItem(this.CURRENT_USER_KEY);
     }
   }
 
-  /**
-   * Registra um novo usuário.
-   */
   registerUser(username, password) {
     const result = this.userManager.registerUser(username, password);
-    if (result) {
-      this.saveUsersToStorage();
-    }
+    if (result) this.saveUsersToStorage();
     return result;
   }
 
-  /**
-   * Faz login de um usuário.
-   */
   login(username, password) {
     const user = this.userManager.login(username, password);
-    if (user) {
-      this.saveCurrentUserToStorage();
-    }
+    if (user) this.saveCurrentUserToStorage();
     return user;
   }
 
-  /**
-   * Faz logout do usuário atual.
-   */
   logout() {
     this.userManager.logout();
     this.saveCurrentUserToStorage();
   }
 
-  /**
-   * Retorna o usuário logado.
-   */
-  getLoggedInUser() {
-    return this.userManager.getLoggedInUser();
-  }
+  getLoggedInUser() { return this.userManager.getLoggedInUser(); }
+  isUserLoggedIn() { return this.userManager.isUserLoggedIn(); }
 
-  /**
-   * Verifica se há um usuário logado.
-   */
-  isUserLoggedIn() {
-    return this.userManager.isUserLoggedIn();
-  }
-
-  /**
-   * Cria uma nova anotação.
-   */
   createNote(title, content) {
     const note = this.noteManager.createNote(title, content);
     this.saveNotesToStorage();
     return note;
   }
 
-  /**
-   * Atualiza uma anotação existente.
-   */
   updateNote(id, newTitle, newContent, newColor, newTags, newCategory) {
     const result = this.noteManager.updateNote(id, newTitle, newContent, newColor, newTags, newCategory);
-    if (result) {
-      this.saveNotesToStorage();
-    }
+    if (result) this.saveNotesToStorage();
     return result;
   }
 
-  /**
-   * Deleta uma anotação.
-   */
   deleteNote(id) {
     const result = this.noteManager.deleteNote(id);
-    if (result) {
-      this.saveNotesToStorage();
-    }
+    if (result) this.saveNotesToStorage();
     return result;
   }
 
-  /**
-   * Retorna todas as anotações.
-   */
   getAllNotes() {
-    return this.noteManager.getAllNotes();
+    this.loadFromStorage(); // Garante que os dados estão frescos
+    return Array.from(this.noteManager.notes.values()).map(note => ({
+      id: note.id || (typeof note.getId === 'function' ? note.getId() : null),
+      title: typeof note.getTitle === 'function' ? note.getTitle() : note.title,
+      content: typeof note.getContent === 'function' ? note.getContent() : note.content,
+      category: typeof note.getCategory === 'function' ? note.getCategory() : note.category,
+      tags: Array.from(note.tags || []),
+      lastModificationDate: typeof note.getLastModificationDate === 'function' ? note.getLastModificationDate() : note.lastModificationDate
+    })).sort((a, b) => new Date(b.lastModificationDate) - new Date(a.lastModificationDate));
   }
 
-  /**
-   * Busca anotações por palavra-chave.
-   */
   searchNotes(keyword) {
-    return this.noteManager.searchNotes(keyword);
+    const all = this.getAllNotes();
+    if (!keyword) return all;
+    const lower = keyword.toLowerCase();
+    return all.filter(n => 
+      n.title.toLowerCase().includes(lower) || 
+      n.content.toLowerCase().includes(lower) ||
+      (n.category && n.category.toLowerCase().includes(lower)) ||
+      n.tags.some(t => t.toLowerCase().includes(lower))
+    );
   }
 
-  /**
-   * Filtra anotações por categoria.
-   */
-  filterNotesByCategory(category) {
-    return this.noteManager.filterNotesByCategory(category);
-  }
-
-  /**
-   * Filtra anotações por tag.
-   */
-  filterNotesByTag(tag) {
-    return this.noteManager.filterNotesByTag(tag);
-  }
-
-  /**
-   * Sugere uma categoria baseada no conteúdo.
-   */
-  suggestCategory(content) {
-    return this.noteManager.suggestCategory(content);
-  }
-
-  /**
-   * Simula a conversão de áudio em texto.
-   */
-  convertAudioToText(audioFilePath) {
-    return this.noteManager.convertAudioToText(audioFilePath);
-  }
-
-  /**
-   * Exporta as anotações para JSON.
-   */
-  exportNotesToJson() {
-    return this.noteManager.exportNotesToJson();
-  }
-
-  /**
-   * Limpa todos os dados do localStorage (para testes e reset).
-   */
-  clearAllData() {
-    localStorage.removeItem(this.USERS_KEY);
-    localStorage.removeItem(this.NOTES_KEY);
-    localStorage.removeItem(this.CURRENT_USER_KEY);
-    this.userManager = new UserManager();
-    this.noteManager = new NoteManager();
-  }
+  suggestCategory(content) { return this.noteManager.suggestCategory(content); }
+  convertAudioToText() { return "Texto convertido de áudio com sucesso!"; }
 }
 
 export default StorageManager;
