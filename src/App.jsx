@@ -53,7 +53,7 @@ const AboutScreen = () => (
     <h2 className="text-2xl font-bold mb-4 text-blue-800">Sobre o Diário Digital</h2>
     <p className="mb-4 text-justify leading-relaxed">
       Este aplicativo foi desenvolvido como parte da atividade prática da disciplina de 
-      Desenvolvimento de Aplicativos Móveis (Extensão III), adaptado para ser um Diário Digital 
+      Desenvolvimento de Aplicativos Móveis, adaptado para ser um Diário Digital 
       com funcionalidades avançadas de organização e categorização de anotações.
     </p>
     <div className="bg-white p-4 rounded-lg shadow mb-4 border-l-4 border-blue-600">
