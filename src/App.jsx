@@ -299,14 +299,17 @@ const NoteEditorScreen = ({ note, onSave, navigate }) => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
         ></textarea>
-        <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => setCategory(storageManager.suggestCategory(content))} className="bg-purple-500 text-white p-3 rounded-lg hover:bg-purple-600 font-semibold flex items-center justify-center gap-2">
-            <Tag size={18} /> Sugerir Categoria
-          </button>
-          <button type="button" onClick={() => setContent(prev => prev + (prev ? '\n\n' : '') + storageManager.convertAudioToText())} className="bg-indigo-500 text-white p-3 rounded-lg hover:bg-indigo-600 font-semibold flex items-center justify-center gap-2">
-            <Mic size={18} /> Áudio para Texto
-          </button>
-        </div>
+        {/* Bloco de botões de IA - Botão de Sugerir Categoria Removido */}
+       <div className="grid grid-cols-1 gap-2">
+       <button 
+       type="button" 
+       onClick={() => setContent(prev => prev + (prev ? '\n\n' : '') + storageManager.convertAudioToText())} 
+       className="bg-indigo-500 text-white p-3 rounded-lg hover:bg-indigo-600 font-semibold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+       >
+       <Mic size={18} /> Áudio para Texto (Simulação)
+    </button>
+ </div>
+ 
         <input
           type="text"
           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
