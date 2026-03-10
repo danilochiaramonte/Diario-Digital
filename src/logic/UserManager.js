@@ -21,18 +21,32 @@ class UserManager {
 
     login(username, password) {
         const user = this.users.get(username);
-        if (user && user.getPassword() === password) {
-            this.loggedInUser = user;
-            console.log(`Login bem-sucedido para o usuário: ${username}`);
-            return user;
+        
+        if (user) {
+            // A MÁGICA AQUI: Tenta usar a função, se não existir (porque veio do localStorage), usa a propriedade direta.
+            const userPassword = typeof user.getPassword === 'function' 
+                ? user.getPassword() 
+                : user.password;
+
+            if (userPassword === password) {
+                this.loggedInUser = user;
+                console.log(`Login bem-sucedido para o usuário: ${username}`);
+                return user;
+            }
         }
+        
         console.log("Erro: Nome de usuário ou senha inválidos.");
         return null;
     }
 
     logout() {
         if (this.loggedInUser) {
-            console.log(`Logout do usuário: ${this.loggedInUser.getUsername()}`);
+            // A mesma proteção aplicada ao username na hora de deslogar
+            const username = typeof this.loggedInUser.getUsername === 'function' 
+                ? this.loggedInUser.getUsername() 
+                : this.loggedInUser.username;
+                
+            console.log(`Logout do usuário: ${username}`);
             this.loggedInUser = null;
         }
     }
@@ -47,5 +61,3 @@ class UserManager {
 }
 
 export default UserManager;
-
-
