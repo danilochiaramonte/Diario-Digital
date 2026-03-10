@@ -27,14 +27,20 @@ export default function App() {
     }
   }, [refreshNotes]);
 
+  // --- Função de Login Corrigida ---
   const handleLogin = (e) => {
     e.preventDefault();
-    if (storageManager.login(loginUser, loginPass)) {
-      setIsLoggedIn(true);
-      setCurrentPage('home');
-      refreshNotes();
-    } else {
-      alert('Usuário ou senha inválidos');
+    try {
+      if (storageManager.login(loginUser, loginPass)) {
+        setIsLoggedIn(true);
+        setCurrentPage('home');
+        refreshNotes();
+      } else {
+        alert('Usuário ou senha inválidos');
+      }
+    } catch (error) {
+      console.error("Erro interno ao processar o login:", error);
+      alert('Ocorreu um erro no sistema ao tentar logar. Verifique o console do navegador.');
     }
   };
 
@@ -48,10 +54,15 @@ export default function App() {
     }
   };
 
+  // --- Função de Logout Corrigida ---
   const handleLogout = () => {
     storageManager.logout();
     localStorage.removeItem('diario_usuario_logado');
-    window.location.href = window.location.origin;
+    setIsLoggedIn(false);
+    setCurrentPage('login');
+    setLoginUser('');
+    setLoginPass('');
+    setNotes([]);
   };
 
   const navigate = (page, note = null) => {
