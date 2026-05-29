@@ -7,7 +7,50 @@ Serve como matéria-prima do relatório de extensão: cada fase deve descrever *
 
 ## [Unreleased]
 
-_Nenhuma fase pendente no plano da Extensão V. Melhorias futuras (Extensão VI / TCC): ícones PWA em PNG, back-end opcional, testes automatizados._
+_Melhorias futuras (Extensão VI / TCC): ícones PWA em PNG, back-end opcional, testes automatizados._
+
+---
+
+## Fase 7 — Menu de Perfil e Segurança
+
+### Hash de senha (Web Crypto API)
+
+Senhas agora são armazenadas como hash SHA-256 usando a API nativa
+`crypto.subtle.digest` (sem dependência externa). Usuários cadastrados
+antes desta versão continuam funcionando — a senha em texto plano
+ainda é aceita no login, mas é migrada para hash automaticamente
+após autenticação bem-sucedida. Hashes são prefixados com `sha256:`
+para distinguir de senhas legacy.
+
+### Seletor de cores nas notas
+
+Implementada paleta de 7 cores no editor de notas, conforme protótipo
+da Extensão II. A cor escolhida é aplicada na borda lateral do card
+na tela inicial, facilitando a categorização visual.
+
+### Campo `createdAt` em User
+
+Adicionado registro da data de cadastro de cada usuário, usado na
+tela de perfil ("Membro desde...").
+
+### Tela de Perfil do Usuário
+
+Nova tela acessível pelo avatar no canto superior direito, contendo:
+
+- Informações da conta (nome de usuário e data de cadastro)
+- Estatísticas pessoais (total de notas, categoria mais usada,
+  última edição)
+- Troca de senha com validação de senha atual
+- Exportar e Importar JSON (movidos da home para organização)
+- Botão de logout
+- Zona de perigo: exclusão de conta com confirmação tripla
+  (confirm + senha + palavra-chave "EXCLUIR")
+
+### UX
+
+- Botão "Sair" vermelho do header substituído por avatar do usuário
+  com inicial e nome, mais discreto e profissional.
+- Home limpa: botões de export/import movidos para o perfil.
 
 ---
 

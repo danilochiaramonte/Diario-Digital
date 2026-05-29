@@ -1,4 +1,5 @@
 import User from './User';
+import { hashPassword, verifyPassword } from './crypto.js';
 
 class UserManager {
     constructor() {
@@ -6,30 +7,25 @@ class UserManager {
         this.loggedInUser = null;
     }
 
-    registerUser(username, password) {
+    async registerUser(username, password) {
         if (this.users.has(username)) {
             return false;
         }
-        const newUser = new User(username, password);
+        const hashed = await hashPassword(password);
+        const newUser = new User(username, hashed, new Date());
         this.users.set(username, newUser);
         return true;
     }
 
-    login(username, password) {
+    async login(username, password) {
         const user = this.users.get(username);
-        
         if (user) {
-            // A MÁGICA AQUI: Tenta usar a função, se não existir (porque veio do localStorage), usa a propriedade direta.
-            const userPassword = typeof user.getPassword === 'function' 
-                ? user.getPassword() 
-                : user.password;
-
-            if (userPassword === password) {
+            const ok = await verifyPassword(password, user.password);
+            if (ok) {
                 this.loggedInUser = user;
                 return user;
             }
         }
-
         return null;
     }
 

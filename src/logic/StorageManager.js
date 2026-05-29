@@ -4,15 +4,16 @@
  *
  * Responsabilidades:
  *  - Carregar e salvar usuários, notas e sessão atual no localStorage.
- *  - Reinstanciar User e Note como objetos da classe ao ler do storage,
- *    evitando "X is not a function" quando os setters são chamados.
+ *  - Reinstanciar User e Note como objetos da classe ao ler do storage.
  *  - Isolar notas por usuário através do campo "author" em cada nota.
+ *  - Operações async de auth (hash SHA-256 via Web Crypto API).
  */
 
 import UserManager from './UserManager';
 import NoteManager from './NoteManager';
 import User from './User';
 import Note from './Note';
+import { hashPassword, verifyPassword, isHashed } from './crypto.js';
 
 class StorageManager {
   constructor() {
@@ -24,7 +25,6 @@ class StorageManager {
     this.loadFromStorage();
   }
 
-  // Reconstrói uma instância de Note a partir de um objeto cru
   _hydrateNote(id, data) {
     const note = new Note(
       data.id || id,
@@ -40,13 +40,15 @@ class StorageManager {
     return note;
   }
 
-  // Reconstrói uma instância de User a partir de um objeto cru
   _hydrateUser(data) {
-    return new User(data.username, data.password);
+    return new User(
+      data.username,
+      data.password,
+      data.createdAt ? new Date(data.createdAt) : new Date()
+    );
   }
 
   loadFromStorage() {
-    // 1. Carrega Usuários e reinstancia como User
     try {
       const usersData = localStorage.getItem(this.USERS_KEY);
       if (usersData) {
@@ -64,7 +66,6 @@ class StorageManager {
       this.userManager.users = new Map();
     }
 
-    // 2. Carrega Notas e reinstancia como Note (corrige bug "setTitle is not a function")
     try {
       const notesData = localStorage.getItem(this.NOTES_KEY);
       if (notesData) {
@@ -82,7 +83,6 @@ class StorageManager {
       this.noteManager.notes = new Map();
     }
 
-    // 3. Carrega Sessão Atual
     try {
       const currentUserData = localStorage.getItem(this.CURRENT_USER_KEY);
       if (currentUserData) {
@@ -103,7 +103,7 @@ class StorageManager {
   saveUsersToStorage() {
     const usersArray = Array.from(this.userManager.users.entries()).map(([username, user]) => [
       username,
-      { username: user.username, password: user.password },
+      { username: user.username, password: user.password, createdAt: user.createdAt },
     ]);
     localStorage.setItem(this.USERS_KEY, JSON.stringify(usersArray));
   }
@@ -137,21 +137,27 @@ class StorageManager {
     }
   }
 
-  // username do usuário logado, ou null
   _getCurrentUsername() {
     const user = this.userManager.loggedInUser;
     return user ? user.username : null;
   }
 
-  registerUser(username, password) {
-    const result = this.userManager.registerUser(username, password);
+  async registerUser(username, password) {
+    const result = await this.userManager.registerUser(username, password);
     if (result) this.saveUsersToStorage();
     return result;
   }
 
-  login(username, password) {
-    const user = this.userManager.login(username, password);
-    if (user) this.saveCurrentUserToStorage();
+  async login(username, password) {
+    const user = await this.userManager.login(username, password);
+    if (user) {
+      // Migração silenciosa: senha legacy em texto plano → hash
+      if (!isHashed(user.password)) {
+        user.password = await hashPassword(password);
+        this.saveUsersToStorage();
+      }
+      this.saveCurrentUserToStorage();
+    }
     return user;
   }
 
@@ -163,7 +169,35 @@ class StorageManager {
   getLoggedInUser() { return this.userManager.getLoggedInUser(); }
   isUserLoggedIn() { return this.userManager.isUserLoggedIn(); }
 
-  // Cria nota já vinculada ao usuário logado
+  async changePassword(currentPassword, newPassword) {
+    const user = this.userManager.loggedInUser;
+    if (!user) throw new Error('Nenhum usuário logado.');
+    const ok = await verifyPassword(currentPassword, user.password);
+    if (!ok) throw new Error('Senha atual incorreta.');
+    user.password = await hashPassword(newPassword);
+    this.saveUsersToStorage();
+    return true;
+  }
+
+  async deleteAccount(password) {
+    const user = this.userManager.loggedInUser;
+    if (!user) throw new Error('Nenhum usuário logado.');
+    const ok = await verifyPassword(password, user.password);
+    if (!ok) throw new Error('Senha incorreta.');
+    const username = user.username;
+    for (const [id, note] of this.noteManager.notes.entries()) {
+      if (note.author === username) {
+        this.noteManager.notes.delete(id);
+      }
+    }
+    this.userManager.users.delete(username);
+    this.userManager.loggedInUser = null;
+    this.saveNotesToStorage();
+    this.saveUsersToStorage();
+    this.saveCurrentUserToStorage();
+    return true;
+  }
+
   createNote(title, content) {
     const author = this._getCurrentUsername();
     const note = this.noteManager.createNote(title, content, author);
@@ -172,7 +206,6 @@ class StorageManager {
   }
 
   updateNote(id, newTitle, newContent, newColor, newTags, newCategory) {
-    // Garante que o usuário só edita as próprias notas
     const note = this.noteManager.notes.get(id);
     const currentUser = this._getCurrentUsername();
     if (note && note.author && note.author !== currentUser) {
@@ -184,7 +217,6 @@ class StorageManager {
   }
 
   deleteNote(id) {
-    // Garante que o usuário só apaga as próprias notas
     const note = this.noteManager.notes.get(id);
     const currentUser = this._getCurrentUsername();
     if (note && note.author && note.author !== currentUser) {
@@ -195,7 +227,6 @@ class StorageManager {
     return result;
   }
 
-  // Lista apenas as notas do usuário logado
   getAllNotes() {
     const currentUser = this._getCurrentUsername();
     return Array.from(this.noteManager.notes.values())
@@ -228,13 +259,11 @@ class StorageManager {
 
   suggestCategory(content) { return this.noteManager.suggestCategory(content); }
 
-  // Exporta JSON apenas das notas do usuário logado
   exportNotesToJson() {
     const currentUser = this._getCurrentUsername();
     return this.noteManager.exportNotesToJson(currentUser);
   }
 
-  // Importa JSON, vinculando todas as notas ao usuário logado
   importNotesFromJson(jsonString) {
     const currentUser = this._getCurrentUsername();
     if (!currentUser) {

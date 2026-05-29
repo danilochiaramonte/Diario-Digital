@@ -44,6 +44,23 @@ As seguintes correções e melhorias foram implementadas para garantir um tratam
 *   **Confirmação de Exclusão:** A confirmação de exclusão de notas via `window.confirm` foi mantida para evitar perdas acidentais de dados.
 *   **Limpeza de Campos:** Campos de formulário são limpos após o sucesso de uma operação (ex: após criar uma nota ou registrar um usuário).
 
+---
+
+### 3. Testes da Fase 7 — Perfil, Hash de Senha e Cores
+
+| ID do Teste | Descrição do Cenário | Passos para Reprodução | Resultado Esperado |
+|---|---|---|---|
+| **TU-010** | **Migração automática de senha legacy** | 1. Ter um usuário com senha em texto plano (criado antes da Fase 7). 2. Fazer login normalmente. | Login é bem-sucedido. DevTools → Application → Local Storage: `diario_usuarios` exibe a senha com prefixo `sha256:`. |
+| **TU-011** | **Trocar senha com senha atual correta** | 1. Acessar Perfil. 2. Preencher os 3 campos de troca de senha com valores válidos. 3. Clicar em "Alterar senha". | Mensagem de sucesso exibida. Novo login com a nova senha funciona. |
+| **TU-012** | **Trocar senha com senha atual incorreta** | 1. Acessar Perfil. 2. Digitar senha atual errada. 3. Clicar em "Alterar senha". | Mensagem de erro "Senha atual incorreta." exibida. Senha não é alterada. |
+| **TU-013** | **Trocar senha — senhas novas não coincidem** | 1. Acessar Perfil. 2. Digitar nova senha diferente da confirmação. | Mensagem de erro "A nova senha e a confirmação não coincidem." |
+| **TU-014** | **Cor da nota refletida no card da home** | 1. Criar ou editar nota. 2. Escolher cor "Verde" no seletor. 3. Salvar. | Card na home exibe borda esquerda verde. |
+| **TU-015** | **Cor padrão (azul) quando nenhuma selecionada** | 1. Criar nova nota sem alterar a cor. 2. Salvar. | Borda do card é azul (`#3b82f6`). |
+| **TU-016** | **Estatísticas no perfil** | 1. Ter ao menos 2 notas com categorias diferentes. 2. Acessar Perfil. | "Total" mostra contagem correta; "Top categoria" exibe a mais frequente com contagem. |
+| **TU-017** | **Excluir conta — confirmação tripla** | 1. Acessar Perfil → Excluir minha conta. 2. Confirmar os 3 prompts (confirm, senha, "EXCLUIR"). | Conta removida, notas removidas, usuário volta ao login. Login com as credenciais antigas falha. |
+| **TU-018** | **Excluir conta — senha incorreta** | 1. Acessar Perfil → Excluir minha conta. 2. Preencher senha incorreta no prompt. | Alerta "Erro: Senha incorreta." Conta não é excluída. |
+| **TU-019** | **Export/Import movidos para perfil** | 1. Verificar tela Home: botões de export/import não devem aparecer. 2. Acessar Perfil: seção "Dados" com os botões. | Home sem os botões; perfil com os botões funcionando. |
+
 ## Conclusão da Bateria de Testes
 
 A bateria de testes funcionais indica que as funcionalidades principais do Diário Digital estão operacionais na **Extensão V**: autenticação com validações na interface, CRUD de notas, busca, sugestão de categoria, áudio para texto (navegador) e mensagens de erro inline. O app está publicável via GitHub Pages e documentado em `CHANGELOG_EXTENSAO_V.md` e `TESTING_CHECKLIST.md`.

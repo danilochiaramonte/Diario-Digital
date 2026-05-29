@@ -4,11 +4,13 @@ Aplicativo web de anotações pessoais, desenvolvido como projeto de extensão/T
 
 ## Funcionalidades
 
-- Cadastro e login de usuários
-- CRUD de notas (título, conteúdo, categoria, tags)
+- Cadastro e login de usuários (senhas com hash SHA-256 via Web Crypto API)
+- CRUD de notas (título, conteúdo, categoria, tags, cor)
+- Seletor de 7 cores por nota, refletido na borda do card na home
 - Busca por palavra-chave
 - Sugestão de categoria (regras + palavras-chave)
 - Áudio para texto (Web Speech API — Chrome)
+- Menu de perfil: estatísticas, troca de senha, export/import, exclusão de conta
 - PWA instalável com cache offline do app
 
 ## Requisitos

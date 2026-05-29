@@ -26,14 +26,16 @@ Não há back-end nem banco externo nesta versão.
 | 4 | PWA | Instalação, cache do shell, uso offline após primeiro acesso |
 | 5 | Higiene | Remoção de usuário de teste, ESLint, limpeza de logs e arquivos mortos |
 | 6 | Entrega | README, roteiro de vídeo, documentação consolidada, versão 1.0.0 |
+| 7 | Segurança e Perfil | Hash SHA-256, seletor de cores, tela de perfil completa |
 
 ## 3. Interface e experiência do usuário
 
 O `App.jsx` concentra as telas:
 
 - **Login** e **cadastro** (com confirmação de senha e tela de sucesso pós-cadastro)
-- **Home** com listagem, busca e estado vazio
-- **Edição de nota** (título, conteúdo, categoria, tags, áudio, sugestão de categoria)
+- **Home** com listagem, busca e estado vazio; borda do card usa a cor da nota
+- **Edição de nota** (título, conteúdo, categoria, tags, cor, áudio, sugestão de categoria)
+- **Perfil** com 6 seções: info da conta, estatísticas, troca de senha, dados (export/import), logout e zona de perigo
 - **Sobre** com descrição dos recursos
 
 Validações e mensagens seguem `functional_tests.md` (ex.: “As senhas não coincidem.”, “Nome de usuário ou senha inválidos.”).

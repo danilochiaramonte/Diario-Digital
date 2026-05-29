@@ -1,7 +1,8 @@
 class User {
-    constructor(username, password) {
+    constructor(username, password, createdAt = null) {
         this.username = username;
         this.password = password;
+        this.createdAt = createdAt || new Date();
     }
 
     getUsername() {
@@ -20,6 +21,10 @@ class User {
         this.password = password;
     }
 
+    getCreatedAt() {
+        return this.createdAt;
+    }
+
     equals(otherUser) {
         if (!(otherUser instanceof User)) {
             return false;
@@ -33,5 +38,3 @@ class User {
 }
 
 export default User;
-
-
