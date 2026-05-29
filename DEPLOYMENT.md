@@ -34,9 +34,9 @@ Para gerar os arquivos estáticos otimizados para produção, siga os passos aba
 
 O conteúdo da pasta `dist` pode ser hospedado em qualquer serviço de hospedagem de sites estáticos. Alguns exemplos populares incluem:
 
+*   **GitHub Pages** (recomendado para este projeto — deploy automático via Actions)
 *   **Netlify**
 *   **Vercel**
-*   **GitHub Pages**
 *   **Firebase Hosting**
 *   **Amazon S3**
 
@@ -45,9 +45,30 @@ O processo geral para hospedagem é:
 1.  **Faça o upload do conteúdo da pasta `dist`** para o seu provedor de hospedagem estática.
 2.  **Configure o servidor web** para servir o `index.html` como o arquivo padrão para todas as rotas (isso é importante para aplicações de página única - SPA como o React, para que as rotas internas funcionem corretamente).
 
+### GitHub Pages (deploy automático)
+
+O repositório inclui o workflow `.github/workflows/deploy.yml`, que executa `npm ci`, `npm run build` e publica a pasta `dist` no GitHub Pages sempre que houver push na branch `main`.
+
+**Configuração única no GitHub (após o primeiro push com o workflow):**
+
+1. Repositório → **Settings** → **Pages**
+2. Em **Build and deployment** → **Source**, selecione **GitHub Actions**
+3. Após o workflow concluir com sucesso, o site ficará disponível em:
+
+   `https://<seu-usuario>.github.io/Diario-Digital/`
+
+O Vite está configurado com `base: '/Diario-Digital/'` em `vite.config.js`, alinhado ao nome do repositório no GitHub Pages.
+
+**Deploy manual local (opcional):**
+
+```bash
+npm run build
+# Publicar o conteúdo de dist/ (ex.: branch gh-pages ou upload manual)
+```
+
 ### Exemplo de Configuração (Netlify/Vercel)
 
-Serviços como Netlify e Vercel detectam automaticamente projetos Vite e configuram o build e a hospedagem. Você geralmente só precisa conectar seu repositório Git e especificar a pasta `dist` como o diretório de publicação.
+Serviços como Netlify e Vercel detectam automaticamente projetos Vite e configuram o build e a hospedagem. Você geralmente só precisa conectar seu repositório Git e especificar a pasta `dist` como o diretório de publicação. Para estes serviços, ajuste o `base` em `vite.config.js` conforme a URL do deploy (raiz `/` ou subpasta).
 
 ## 4. Variáveis de Ambiente (Considerações para Back-end)
 

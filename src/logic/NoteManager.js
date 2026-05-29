@@ -9,7 +9,6 @@ class NoteManager {
         const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); // Simple ID generation
         const newNote = new Note(id, title, content);
         this.notes.set(id, newNote);
-        console.log(`Nota "${title}" criada com sucesso.`);
         return newNote;
     }
 
@@ -36,20 +35,13 @@ class NoteManager {
             if (newCategory !== null && newCategory !== undefined && newCategory !== '') {
                 note.setCategory(newCategory);
             }
-            console.log(`Nota "${note.getTitle()}" atualizada com sucesso.`);
             return true;
         }
-        console.log(`Erro: Nota com ID ${id} não encontrada.`);
         return false;
     }
 
     deleteNote(id) {
-        if (this.notes.delete(id)) {
-            console.log(`Nota com ID ${id} excluída com sucesso.`);
-            return true;
-        }
-        console.log(`Erro: Nota com ID ${id} não encontrada.`);
-        return false;
+        return this.notes.delete(id);
     }
 
     getAllNotes() {
@@ -94,24 +86,94 @@ class NoteManager {
         );
     }
 
-    // Simulação de categorização automática por IA
+    // Normaliza texto para comparação (minúsculas, sem acentos)
+    _normalizeForMatch(text) {
+        return String(text)
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    // Simulação de categorização automática por IA (regras + pontuação por palavras-chave)
     suggestCategory(content) {
-        // Lógica simplificada para demonstração
-        if (content.toLowerCase().includes("projeto") || content.toLowerCase().includes("desenvolvimento")) {
-            return "Trabalho";
-        } else if (content.toLowerCase().includes("compras") || content.toLowerCase().includes("mercado")) {
-            return "Pessoal";
-        } else if (content.toLowerCase().includes("reunião") || content.toLowerCase().includes("prazo")) {
-            return "Urgente";
+        const text = this._normalizeForMatch(content);
+        if (!text.trim()) {
+            return 'Geral';
         }
-        return "Geral";
+
+        const categoryKeywords = {
+            Compras: [
+                'compra', 'comprar', 'compras', 'mercado', 'supermercado', 'feira',
+                'lista', 'leite', 'pao', 'ovos', 'produto', 'sacola', 'carrinho',
+                'promocao', 'desconto', 'preco', 'ifood', 'delivery', 'pedido',
+                'restaurante', 'almoco', 'jantar', 'cafe', 'padaria', 'acougue',
+                'hortifruti', 'shopee', 'amazon', 'mercado livre',
+            ],
+            Financas: [
+                'financas', 'financeiro', 'dinheiro', 'pix', 'boleto', 'fatura',
+                'cartao', 'credito', 'debito', 'salario', 'holerite', 'imposto',
+                'aluguel', 'condominio', 'parcela', 'juros', 'emprestimo',
+                'investimento', 'poupar', 'orcamento', 'conta', 'transferencia',
+                'divida', 'economizar', 'gasto', 'pagamento', 'nubank', 'banco',
+            ],
+            Trabalho: [
+                'projeto', 'desenvolvimento', 'trabalho', 'codigo', 'programar',
+                'cliente', 'sprint', 'tarefa', 'reuniao', 'equipe', 'empresa',
+                'relatorio', 'entrega', 'office', 'email', 'chefe', 'lider',
+                'meeting', 'zoom', 'teams', 'slack', 'github', 'deploy', 'bug',
+                'proposta', 'contrato', 'freelance', 'estagio', 'vaga',
+                'curriculo', 'home office', 'presencial', 'plantao',
+            ],
+            Urgente: [
+                'urgente', 'prazo', 'deadline', 'amanha', 'hoje', 'importante',
+                'atrasado', 'vence', 'rapido', 'prioridade', 'alerta', 'emergencia',
+                'critico', 'asap', 'expira', 'ultimo dia', 'nao esquecer',
+                'lembrar', 'cobranca', 'imediato', 'agora',
+            ],
+            Estudos: [
+                'estudo', 'estudar', 'prova', 'faculdade', 'aula', 'tcc',
+                'universidade', 'unifil', 'disciplina', 'trabalho academico',
+                'apresentacao', 'seminario', 'dever', 'licao', 'resumo', 'slide',
+                'bibliografia', 'simulado', 'enem', 'vestibular', 'professor',
+                'materia', 'redacao', 'pesquisa', 'monografia', 'orientador',
+                'laboratorio', 'cronograma', 'edital', 'nota de aula',
+            ],
+            Saude: [
+                'saude', 'medico', 'medica', 'hospital', 'clinica', 'remedio',
+                'receita', 'sintoma', 'dor', 'febre', 'gripe', 'vacina', 'exame',
+                'consulta', 'dentista', 'terapia', 'psicologo', 'nutricionista',
+                'pressao', 'dieta', 'nutricao', 'sono', 'dormir', 'academia',
+                'treino', 'exercicio', 'caminhada', 'check-up', 'checkup',
+            ],
+            Pessoal: [
+                'familia', 'casa', 'hobby', 'viagem', 'aniversario', 'amigo',
+                'lazer', 'filme', 'serie', 'festa', 'churrasco', 'presente',
+                'namoro', 'casamento', 'filho', 'filha', 'mae', 'pai', 'pet',
+                'cachorro', 'gato', 'ferias', 'hotel', 'passagem', 'descanso',
+                'igreja', 'futebol', 'jogo', 'musica', 'show', 'plano', 'meta',
+            ],
+        };
+
+        let bestCategory = 'Geral';
+        let bestScore = 0;
+
+        for (const [category, keywords] of Object.entries(categoryKeywords)) {
+            const score = keywords.reduce(
+                (total, keyword) => total + (text.includes(keyword) ? 1 : 0),
+                0
+            );
+            if (score > bestScore) {
+                bestScore = score;
+                bestCategory = category;
+            }
+        }
+
+        return bestCategory;
     }
 
     // Simulação de conversão de áudio em texto por IA
-    convertAudioToText(audioFilePath) {
-        console.log(`Simulando conversão de áudio em texto para: ${audioFilePath}`);
-        // Em uma implementação real, aqui seria feita a chamada para uma API de Speech-to-Text
-        return "Texto transcrito do áudio: Esta é uma anotação de voz.";
+    convertAudioToText() {
+        return 'Texto transcrito do áudio: Esta é uma anotação de voz.';
     }
 
     // Exportação de dados para JSON

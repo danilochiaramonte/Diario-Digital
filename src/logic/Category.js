@@ -28,7 +28,7 @@ class Category {
     }
 
     toString() {
-        return `Category{name=\'${this.name}\', description=\'${this.description}\'}`;
+        return `Category{name='${this.name}', description='${this.description}'}`;
     }
 }
 

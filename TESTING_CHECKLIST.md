@@ -187,8 +187,9 @@ Use este checklist para validar que todas as funcionalidades do Diário Digital 
 
 Se todos os testes passarem, o Diário Digital está **100% pronto para ser entregue** ao professor!
 
-**Próximas etapas:**
-1. Faça o build final: `npm run build`
-2. Faça o deploy na Vercel/Netlify
-3. Compartilhe o link com o professor
-4. Prepare o vídeo de 10 minutos mostrando o funcionamento
+**Próximas etapas (Extensão V — entrega):**
+1. Execute `npm run build` e `npm run lint`
+2. Faça push na `main` e confira o deploy no GitHub Pages (Settings → Pages → GitHub Actions)
+3. Compartilhe o link: `https://<seu-usuario>.github.io/Diario-Digital/`
+4. Grave o vídeo seguindo [ROTEIRO_VIDEO_EXTENSAO_V.md](./ROTEIRO_VIDEO_EXTENSAO_V.md)
+5. Use [CHANGELOG_EXTENSAO_V.md](./CHANGELOG_EXTENSAO_V.md) como base do relatório escrito

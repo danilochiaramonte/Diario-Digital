@@ -46,4 +46,4 @@ As seguintes correções e melhorias foram implementadas para garantir um tratam
 
 ## Conclusão da Bateria de Testes
 
-A bateria de testes funcionais simulada indica que todas as funcionalidades principais do Diário Digital, incluindo autenticação, gerenciamento de anotações e as simulações de IA, estão operacionais e o tratamento de erros básico está implementado para garantir uma experiência de usuário satisfatória. O código está pronto para a próxima fase de preparação para hospedagem.
+A bateria de testes funcionais indica que as funcionalidades principais do Diário Digital estão operacionais na **Extensão V**: autenticação com validações na interface, CRUD de notas, busca, sugestão de categoria, áudio para texto (navegador) e mensagens de erro inline. O app está publicável via GitHub Pages e documentado em `CHANGELOG_EXTENSAO_V.md` e `TESTING_CHECKLIST.md`.

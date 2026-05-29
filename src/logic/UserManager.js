@@ -4,18 +4,14 @@ class UserManager {
     constructor() {
         this.users = new Map();
         this.loggedInUser = null;
-        // Adicionar um usuário de teste para facilitar
-        this.registerUser("teste", "senha123");
     }
 
     registerUser(username, password) {
         if (this.users.has(username)) {
-            console.log("Erro: Nome de usuário já existente.");
             return false;
         }
         const newUser = new User(username, password);
         this.users.set(username, newUser);
-        console.log(`Usuário ${username} registrado com sucesso.`);
         return true;
     }
 
@@ -30,25 +26,15 @@ class UserManager {
 
             if (userPassword === password) {
                 this.loggedInUser = user;
-                console.log(`Login bem-sucedido para o usuário: ${username}`);
                 return user;
             }
         }
-        
-        console.log("Erro: Nome de usuário ou senha inválidos.");
+
         return null;
     }
 
     logout() {
-        if (this.loggedInUser) {
-            // A mesma proteção aplicada ao username na hora de deslogar
-            const username = typeof this.loggedInUser.getUsername === 'function' 
-                ? this.loggedInUser.getUsername() 
-                : this.loggedInUser.username;
-                
-            console.log(`Logout do usuário: ${username}`);
-            this.loggedInUser = null;
-        }
+        this.loggedInUser = null;
     }
 
     getLoggedInUser() {
