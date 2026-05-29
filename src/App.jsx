@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Trash2, Plus, Info, ArrowLeft, LogOut, Edit, Save, Mic, Search, CheckCircle2, Sparkles } from 'lucide-react';
+import { Trash2, Plus, Info, ArrowLeft, LogOut, Edit, Save, Mic, Search, CheckCircle2, Sparkles, Download, Upload } from 'lucide-react';
 import StorageManager from './logic/StorageManager';
 
 const storageManager = new StorageManager();
@@ -245,6 +245,44 @@ export default function App() {
     }
   };
 
+  const handleExportNotes = () => {
+    try {
+      const json = storageManager.exportNotesToJson();
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const username = storageManager.getLoggedInUser()?.username || 'usuario';
+      const dateStr = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `diario-${username}-${dateStr}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao exportar notas:', error);
+      alert('Erro ao exportar notas. Tente novamente.');
+    }
+  };
+
+  const handleImportNotes = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const count = storageManager.importNotesFromJson(e.target.result);
+        refreshNotes();
+        alert(`${count} nota(s) importada(s) com sucesso.`);
+      } catch (error) {
+        console.error('Erro ao importar notas:', error);
+        alert(`Erro ao importar: ${error.message}`);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // permite reimportar o mesmo arquivo
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
       {isLoggedIn && (
@@ -388,7 +426,7 @@ export default function App() {
 
         {isLoggedIn && currentPage === 'home' && (
           <div className="p-4 pb-32">
-            <div className="relative mb-8">
+            <div className="relative mb-4">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
@@ -397,6 +435,29 @@ export default function App() {
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
               />
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6 justify-end">
+              <button
+                type="button"
+                onClick={handleExportNotes}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium shadow-sm transition-all"
+                title="Baixar minhas notas como JSON"
+              >
+                <Download size={16} /> Exportar JSON
+              </button>
+              <label
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm font-medium shadow-sm transition-all cursor-pointer"
+                title="Importar notas de um arquivo JSON"
+              >
+                <Upload size={16} /> Importar JSON
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImportNotes}
+                  className="hidden"
+                />
+              </label>
             </div>
 
             {notes.length === 0 && (

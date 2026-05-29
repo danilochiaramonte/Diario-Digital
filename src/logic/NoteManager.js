@@ -5,9 +5,9 @@ class NoteManager {
         this.notes = new Map();
     }
 
-    createNote(title, content) {
+    createNote(title, content, author = null) {
         const id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15); // Simple ID generation
-        const newNote = new Note(id, title, content);
+        const newNote = new Note(id, title, content, author);
         this.notes.set(id, newNote);
         return newNote;
     }
@@ -19,21 +19,23 @@ class NoteManager {
     updateNote(id, newTitle, newContent, newColor, newTags, newCategory) {
         const note = this.notes.get(id);
         if (note) {
-            if (newTitle !== null && newTitle !== undefined && newTitle !== '') {
+            // null/undefined = não alterar; string vazia = limpar o campo
+            if (newTitle !== null && newTitle !== undefined) {
                 note.setTitle(newTitle);
             }
-            if (newContent !== null && newContent !== undefined && newContent !== '') {
+            if (newContent !== null && newContent !== undefined) {
                 note.setContent(newContent);
             }
-            if (newColor !== null && newColor !== undefined && newColor !== '') {
+            if (newColor !== null && newColor !== undefined) {
                 note.setColor(newColor);
             }
             if (newTags !== null && newTags !== undefined) {
+                if (!(note.tags instanceof Set)) note.tags = new Set();
                 note.tags.clear();
                 newTags.forEach(tag => note.addTag(tag));
             }
-            if (newCategory !== null && newCategory !== undefined && newCategory !== '') {
-                note.setCategory(newCategory);
+            if (newCategory !== null && newCategory !== undefined) {
+                note.setCategory(newCategory === '' ? null : newCategory);
             }
             return true;
         }
@@ -177,8 +179,11 @@ class NoteManager {
     }
 
     // Exportação de dados para JSON
-    exportNotesToJson() {
-        return JSON.stringify(Array.from(this.notes.values()).map(note => ({
+    exportNotesToJson(filterByAuthor = null) {
+        const notes = Array.from(this.notes.values()).filter(note =>
+            filterByAuthor === null || note.author === filterByAuthor
+        );
+        return JSON.stringify(notes.map(note => ({
             id: note.getId(),
             title: note.getTitle(),
             content: note.getContent(),
@@ -186,8 +191,38 @@ class NoteManager {
             lastModificationDate: note.getLastModificationDate(),
             color: note.getColor(),
             tags: note.getTags(),
-            category: note.getCategory()
+            category: note.getCategory(),
+            author: note.getAuthor(),
         })), null, 2);
+    }
+
+    // Importação de notas a partir de JSON. Retorna a quantidade importada.
+    importNotesFromJson(jsonString, author = null) {
+        let parsed;
+        try {
+            parsed = JSON.parse(jsonString);
+        } catch {
+            throw new Error('Arquivo JSON inválido.');
+        }
+        if (!Array.isArray(parsed)) {
+            throw new Error('Formato esperado: lista de notas.');
+        }
+        let imported = 0;
+        for (const data of parsed) {
+            if (!data || typeof data !== 'object') continue;
+            const id = data.id || (Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+            // Vincula ao usuário atual (se informado), independentemente do autor original do arquivo
+            const noteAuthor = author !== null ? author : (data.author || null);
+            const note = new Note(id, data.title || '', data.content || '', noteAuthor);
+            note.creationDate = data.creationDate ? new Date(data.creationDate) : new Date();
+            note.lastModificationDate = data.lastModificationDate ? new Date(data.lastModificationDate) : new Date();
+            note.color = data.color || null;
+            note.category = data.category || null;
+            note.tags = new Set(Array.isArray(data.tags) ? data.tags : []);
+            this.notes.set(id, note);
+            imported += 1;
+        }
+        return imported;
     }
 }
 

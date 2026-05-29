@@ -1,5 +1,5 @@
 class Note {
-    constructor(id, title, content) {
+    constructor(id, title, content, author = null) {
         this.id = id;
         this.title = title;
         this.content = content;
@@ -8,6 +8,16 @@ class Note {
         this.color = null;
         this.tags = new Set();
         this.category = null;
+        // author: username do dono da nota (isolamento de dados por usuário)
+        this.author = author;
+    }
+
+    getAuthor() {
+        return this.author;
+    }
+
+    setAuthor(author) {
+        this.author = author;
     }
 
     getId() {
