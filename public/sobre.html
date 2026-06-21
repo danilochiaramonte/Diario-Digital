@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diário Digital Inteligente — Sobre o projeto</title>
+  <meta name="description" content="Diário Digital Inteligente: aplicativo web de anotações pessoais com organização por cores, categorias e busca. Projeto de extensão do curso de Análise e Desenvolvimento de Sistemas da UniFil." />
+  <style>
+    :root {
+      --azul: #2D8CFF;
+      --azul-escuro: #1f6fd6;
+      --tinta: #1a1f36;
+      --cinza: #5b6478;
+      --cinza-claro: #8a93a6;
+      --fundo: #f5f7fb;
+      --branco: #ffffff;
+      --borda: #e6eaf2;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: var(--tinta);
+      background: var(--fundo);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Cabeçalho / Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--azul) 0%, #6aa9ff 100%);
+      color: #fff;
+      padding: 88px 0 96px;
+      text-align: center;
+    }
+
+    .hero .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 2.9rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 18px;
+    }
+
+    .hero p {
+      font-size: 1.18rem;
+      max-width: 640px;
+      margin: 0 auto 36px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .botoes {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-principal {
+      background: #fff;
+      color: var(--azul-escuro);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+    }
+
+    .btn-principal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+    }
+
+    .btn-secundario {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .btn-secundario:hover {
+      background: rgba(255, 255, 255, 0.24);
+      transform: translateY(-2px);
+    }
+
+    /* Seções */
+    section { padding: 72px 0; }
+
+    .secao-titulo {
+      font-size: 1.9rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .secao-sub {
+      text-align: center;
+      color: var(--cinza);
+      max-width: 600px;
+      margin: 0 auto 48px;
+      font-size: 1.05rem;
+    }
+
+    /* O que é */
+    .sobre-texto {
+      max-width: 760px;
+      margin: 0 auto;
+      font-size: 1.12rem;
+      color: var(--cinza);
+    }
+
+    .sobre-texto p { margin-bottom: 20px; }
+
+    .sobre-texto strong { color: var(--tinta); }
+
+    /* Grade de funcionalidades */
+    .grade {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 22px;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      padding: 28px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(26, 31, 54, 0.08);
+    }
+
+    .card .icone {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(45, 140, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 1.18rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .card p {
+      color: var(--cinza);
+      font-size: 0.98rem;
+    }
+
+    .fundo-branco { background: var(--branco); }
+
+    /* Tecnologias */
+    .techs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .tech {
+      background: var(--fundo);
+      border: 1px solid var(--borda);
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--tinta);
+    }
+
+    .tech span { color: var(--azul); }
+
+    /* Vídeos */
+    .videos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .video-card {
+      display: block;
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 14px;
+      padding: 24px;
+      text-decoration: none;
+      color: var(--tinta);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .video-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(26, 31, 54, 0.08);
+      border-color: var(--azul);
+    }
+
+    .video-card .play {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(45, 140, 255, 0.12);
+      color: var(--azul);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+    }
+
+    .video-card h3 { font-size: 1.1rem; margin-bottom: 4px; }
+    .video-card p { color: var(--cinza-claro); font-size: 0.9rem; }
+
+    /* Equipe */
+    .equipe {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 22px;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .pessoa {
+      background: var(--branco);
+      border: 1px solid var(--borda);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .pessoa .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--azul), #6aa9ff);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin: 0 auto 16px;
+    }
+
+    .pessoa h3 { font-size: 1.1rem; font-weight: 700; }
+    .pessoa p { color: var(--cinza-claro); font-size: 0.92rem; margin-top: 4px; }
+
+    /* Rodapé */
+    footer {
+      background: var(--tinta);
+      color: rgba(255, 255, 255, 0.85);
+      padding: 48px 0;
+      text-align: center;
+    }
+
+    footer .links {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    footer a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      opacity: 0.9;
+      transition: opacity 0.15s ease;
+    }
+
+    footer a:hover { opacity: 1; text-decoration: underline; }
+
+    footer .creditos {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.8;
+    }
+
+    .cta-final {
+      background: linear-gradient(135deg, var(--azul) 0%, #6aa9ff 100%);
+      color: #fff;
+      text-align: center;
+      padding: 72px 0;
+    }
+
+    .cta-final h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .cta-final p {
+      font-size: 1.1rem;
+      margin-bottom: 32px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 64px 0 72px; }
+      .hero h1 { font-size: 2.1rem; }
+      .hero p { font-size: 1.05rem; }
+      section { padding: 56px 0; }
+      .secao-titulo { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container">
+      <span class="badge">Projeto de Extensão · ADS · UniFil</span>
+      <h1>Diário Digital Inteligente</h1>
+      <p>Um lugar simples e organizado para guardar ideias, tarefas e lembretes do dia a dia, direto no navegador e sem complicação.</p>
+      <div class="botoes">
+        <a class="btn btn-principal" href="https://danilochiaramonte.github.io/Diario-Digital/">Acessar a aplicação</a>
+        <a class="btn btn-secundario" href="https://github.com/danilochiaramonte/Diario-Digital">Ver o código no GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- O que é -->
+  <section>
+    <div class="container">
+      <h2 class="secao-titulo">Sobre o projeto</h2>
+      <div class="sobre-texto">
+        <p>Anotar as coisas no papel funciona, mas tem hora que vira bagunça. Caderno some, folha rasga, e quando você precisa achar aquela informação importante, ela nunca está onde deveria. O Diário Digital nasceu pra resolver isso de um jeito leve.</p>
+        <p>A proposta é direta: um aplicativo de anotações que roda no próprio navegador, organiza as notas por <strong>cores, categorias e tags</strong>, e deixa tudo fácil de encontrar com a busca. Cada pessoa tem a sua conta e enxerga apenas as próprias anotações.</p>
+        <p>Por ser uma aplicação <strong>offline-first</strong>, ela continua funcionando mesmo sem internet. Os dados ficam guardados localmente no navegador, e quem quiser pode exportar tudo num arquivo pra fazer backup ou levar pra outro dispositivo. Nada depende de servidor externo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Funcionalidades -->
+  <section class="fundo-branco">
+    <div class="container">
+      <h2 class="secao-titulo">O que dá pra fazer</h2>
+      <p class="secao-sub">As funcionalidades pensadas pra deixar a organização pessoal mais prática.</p>
+      <div class="grade">
+        <div class="card">
+          <div class="icone">🔐</div>
+          <h3>Conta protegida</h3>
+          <p>Cadastro e login com senha guardada de forma segura, usando criptografia direto no navegador. Cada usuário acessa só as próprias notas.</p>
+        </div>
+        <div class="card">
+          <div class="icone">📝</div>
+          <h3>Anotações completas</h3>
+          <p>Crie, edite e apague notas com título, conteúdo, categoria e tags. Tudo salvo automaticamente a cada alteração.</p>
+        </div>
+        <div class="card">
+          <div class="icone">🎨</div>
+          <h3>Organização por cor</h3>
+          <p>Escolha entre sete cores para cada nota. A cor aparece na lateral do cartão e ajuda a bater o olho e achar o que precisa.</p>
+        </div>
+        <div class="card">
+          <div class="icone">🔎</div>
+          <h3>Busca rápida</h3>
+          <p>Encontre qualquer anotação pesquisando por título, conteúdo, tag ou categoria, sem precisar rolar a lista inteira.</p>
+        </div>
+        <div class="card">
+          <div class="icone">🏷️</div>
+          <h3>Sugestão de categoria</h3>
+          <p>O sistema lê o conteúdo da nota e sugere uma categoria com base em palavras-chave, agilizando a organização.</p>
+        </div>
+        <div class="card">
+          <div class="icone">🎤</div>
+          <h3>Voz para texto</h3>
+          <p>Fale e veja a anotação aparecer escrita, usando o reconhecimento de voz do próprio navegador.</p>
+        </div>
+        <div class="card">
+          <div class="icone">👤</div>
+          <h3>Perfil do usuário</h3>
+          <p>Veja estatísticas das suas notas, troque a senha, faça backup dos dados ou apague a conta quando quiser.</p>
+        </div>
+        <div class="card">
+          <div class="icone">📲</div>
+          <h3>Instalável no celular</h3>
+          <p>Por ser um aplicativo web progressivo, dá pra instalar na tela inicial do celular e abrir como se fosse um app comum.</p>
+        </div>
+        <div class="card">
+          <div class="icone">🌙</div>
+          <h3>Modo claro e escuro</h3>
+          <p>Alterne entre os temas claro e escuro conforme a sua preferência ou a iluminação do ambiente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tecnologias -->
+  <section>
+    <div class="container">
+      <h2 class="secao-titulo">Como foi construído</h2>
+      <p class="secao-sub">As principais tecnologias por trás da aplicação.</p>
+      <div class="techs">
+        <div class="tech"><span>React</span></div>
+        <div class="tech"><span>Vite</span></div>
+        <div class="tech"><span>JavaScript</span></div>
+        <div class="tech"><span>Tailwind CSS</span></div>
+        <div class="tech"><span>PWA</span></div>
+        <div class="tech"><span>Web Crypto API</span></div>
+        <div class="tech"><span>Web Speech API</span></div>
+        <div class="tech"><span>localStorage</span></div>
+        <div class="tech"><span>GitHub Pages</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Equipe -->
+  <section class="fundo-branco">
+    <div class="container">
+      <h2 class="secao-titulo">Quem fez</h2>
+      <p class="secao-sub">Estudantes de Análise e Desenvolvimento de Sistemas da UniFil, polo Londrina.</p>
+      <div class="equipe">
+        <div class="pessoa">
+          <div class="avatar">D</div>
+          <h3>Danilo Borges Vieira Chiaramonte</h3>
+          <p>Análise e Desenvolvimento de Sistemas</p>
+        </div>
+        <div class="pessoa">
+          <div class="avatar">J</div>
+          <h3>João Pedro Palasson Dutra</h3>
+          <p>Análise e Desenvolvimento de Sistemas</p>
+        </div>
+        <div class="pessoa">
+          <div class="avatar">M</div>
+          <h3>Matheus Garrido Aquino</h3>
+          <p>Análise e Desenvolvimento de Sistemas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chamada final -->
+  <section class="cta-final">
+    <div class="container">
+      <h2>Experimente o Diário Digital</h2>
+      <p>Crie sua conta e comece a organizar suas anotações agora mesmo.</p>
+      <a class="btn btn-principal" href="https://danilochiaramonte.github.io/Diario-Digital/">Abrir aplicação</a>
+    </div>
+  </section>
+
+  <!-- Rodapé -->
+  <footer>
+    <div class="container">
+      <div class="links">
+        <a href="https://danilochiaramonte.github.io/Diario-Digital/">Aplicação</a>
+        <a href="https://github.com/danilochiaramonte/Diario-Digital">Repositório</a>
+        <a href="#">Voltar ao topo</a>
+      </div>
+      <div class="creditos">
+        Diário Digital Inteligente · Projeto de Extensão<br />
+        Curso de Análise e Desenvolvimento de Sistemas · Centro Universitário Filadélfia (UniFil)<br />
+        Londrina · 2025
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

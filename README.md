@@ -1,67 +1,47 @@
-# Diário Digital
+## Diário Digital
 
-Aplicativo web de anotações pessoais, desenvolvido como projeto de extensão/TCC (ADS — UniFil). Arquitetura **offline-first** com React, Vite e persistência em `localStorage`.
+Aplicativo web de anotações pessoais feito como projeto de extensão do curso de Análise e Desenvolvimento de Sistemas da UniFil.
 
-## Funcionalidades
+A ideia é simples: um diário que roda no próprio navegador, organiza as notas por cor, categoria e tags, e deixa tudo fácil de achar. Funciona offline, sem servidor, guardando os dados no próprio navegador.
 
-- Cadastro e login de usuários (senhas com hash SHA-256 via Web Crypto API)
-- CRUD de notas (título, conteúdo, categoria, tags, cor)
-- Seletor de 7 cores por nota, refletido na borda do card na home
-- Busca por palavra-chave
-- Sugestão de categoria (regras + palavras-chave)
-- Áudio para texto (Web Speech API — Chrome)
-- Menu de perfil: estatísticas, troca de senha, export/import, exclusão de conta
-- PWA instalável com cache offline do app
+Você pode acessar em https://danilochiaramonte.github.io/Diario-Digital/
 
-## Requisitos
+## O que ele faz
 
-- Node.js 18+
-- npm
+Cada usuário cria sua conta e enxerga apenas as próprias notas. As senhas são guardadas com hash SHA-256, gerado direto no navegador pela Web Crypto API.
 
-## Desenvolvimento
+Nas notas dá pra colocar título, conteúdo, categoria, tags e escolher uma entre sete cores, que aparece na lateral do cartão na tela inicial. A busca encontra qualquer anotação por título, conteúdo, tag ou categoria. Tem também sugestão automática de categoria a partir do conteúdo e a opção de ditar a nota por voz.
 
-```bash
+No menu de perfil o usuário vê algumas estatísticas das suas notas, troca a senha, exporta e importa um backup em JSON, ou apaga a conta. O app é um PWA, então dá pra instalar na tela inicial do celular e usar offline.
+
+## Tecnologias
+
+React, Vite, JavaScript, Tailwind CSS e PWA. A persistência é feita com localStorage, a criptografia das senhas com a Web Crypto API e o reconhecimento de voz com a Web Speech API.
+
+## Como rodar localmente
+
+Você precisa do Node.js 18 ou superior e do npm.
+
+```
 npm install
 npm run dev
 ```
 
-URL local (com `base` do GitHub Pages): `http://localhost:5173/Diario-Digital/`
+A aplicação abre em `http://localhost:5173/Diario-Digital/`.
 
-## Build e preview
+Para gerar a versão de produção:
 
-```bash
+```
 npm run build
 npm run preview
 ```
 
-## Deploy (GitHub Pages)
+## Deploy
 
-1. Push na branch `main`
-2. Repositório → **Settings → Pages → Source: GitHub Actions**
-3. Site: `https://<usuario>.github.io/Diario-Digital/`
+O deploy é automático pelo GitHub Pages. Cada push na branch `main` dispara o GitHub Actions, que faz o build e publica o site. Nas configurações do repositório, em Settings e Pages, a fonte está definida como GitHub Actions.
 
-Detalhes em [DEPLOYMENT.md](./DEPLOYMENT.md).
+## Equipe
 
-## Documentação do projeto
+Danilo Borges Vieira Chiaramonte, João Pedro Palasson Dutra e Matheus Garrido Aquino.
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| [CHANGELOG_EXTENSAO_V.md](./CHANGELOG_EXTENSAO_V.md) | Histórico técnico por fase (matéria-prima do relatório) |
-| [implementation_summary.md](./implementation_summary.md) | Resumo da implementação — Extensão V |
-| [functional_tests.md](./functional_tests.md) | Cenários de teste TU/TA |
-| [TESTING_CHECKLIST.md](./TESTING_CHECKLIST.md) | Checklist manual para validação |
-| [ROTEIRO_VIDEO_EXTENSAO_V.md](./ROTEIRO_VIDEO_EXTENSAO_V.md) | Roteiro do vídeo de demonstração (~10 min) |
-
-## Estrutura
-
-```
-src/
-  App.jsx              # Interface React
-  logic/               # Domínio (User, Note, managers, StorageManager)
-public/
-dist/                  # Build de produção (gerado)
-```
-
-## Licença
-
-Projeto acadêmico — uso conforme orientação da disciplina.
+Curso de Análise e Desenvolvimento de Sistemas, Centro Universitário Filadélfia (UniFil), Londrina, 2025.
